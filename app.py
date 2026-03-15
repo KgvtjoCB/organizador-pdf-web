@@ -3,7 +3,7 @@ import fitz  # PyMuPDF
 import io
 
 # Configuração da página
-st.set_page_config(page_title="Organizador de PDFs", layout="centered")
+st.set_page_config(page_title="SISTEMA DE MESCLAGEM DE DOCUMENTOS", layout="centered")
 
 # --- ESTILIZAÇÃO CSS CUSTOMIZADA ---
 st.markdown("""
@@ -32,13 +32,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📄 Sistema de Mesclagem de Documentos")
-
-# Função para resetar o estado
-def limpar_sessao():
-    for key in st.session_state.keys():
-        del st.session_state[key]
-    st.rerun()
+st.title("📄 SISTEMA DE MESCLAGEM DE DOCUMENTOS")
 
 # 1. ÁREA DE UPLOAD
 uploaded_files = st.file_uploader("Selecione os arquivos PDF aqui", type="pdf", accept_multiple_files=True)
@@ -48,7 +42,7 @@ if uploaded_files:
     nomes_arquivos = list(arquivos_dict.keys())
 
     st.write("---")
-    st.subheader("🗂️ Organizar Ordem de Mesclagem")
+    st.subheader("🗂️ ORGANIZAR ORDEM DE MESCLAGEM")
     
     ordem_selecionada = st.multiselect(
         "Selecione os arquivos na ordem correta:",
@@ -120,4 +114,7 @@ if uploaded_files:
                 mime="application/pdf"
             )
         with col2:
-            st.button("🔄 LIMPAR", on_click=limpar_sessao)
+            # Ao clicar, limpa o estado e a página recomeça sem o erro de no-op
+            if st.button("🔄 LIMPAR"):
+                st.session_state.clear()
+                st.rerun()
