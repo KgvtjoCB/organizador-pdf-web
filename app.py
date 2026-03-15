@@ -3,7 +3,7 @@ import fitz  # PyMuPDF
 import io
 
 # Configuração da página
-st.set_page_config(page_title="SISTEMA DE MESCLAGEM DE DOCUMENTOS", layout="centered")
+st.set_page_config(page_title="Organizador de PDFs", layout="centered")
 
 # --- ESTILIZAÇÃO CSS CUSTOMIZADA ---
 st.markdown("""
@@ -32,7 +32,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📄 SISTEMA DE MESCLAGEM DE DOCUMENTOS")
+st.title("📄 Sistema de Mesclagem de Documentos")
 
 # 1. ÁREA DE UPLOAD
 uploaded_files = st.file_uploader("Selecione os arquivos PDF aqui", type="pdf", accept_multiple_files=True)
@@ -42,7 +42,7 @@ if uploaded_files:
     nomes_arquivos = list(arquivos_dict.keys())
 
     st.write("---")
-    st.subheader("🗂️ ORGANIZAR ORDEM DE MESCLAGEM")
+    st.subheader("🗂️ Organizar Ordem de Mesclagem")
     
     ordem_selecionada = st.multiselect(
         "Selecione os arquivos na ordem correta:",
@@ -77,9 +77,11 @@ if uploaded_files:
                             "Natureza: DOCUMENTO NATO-DIGITAL"
                         ]
                         
+                        # Descarta página de rosto de assinatura isolada [cite: 4]
                         if any(termo in texto_limpo for termo in termos_assinatura) and contagem_palavras < 110:
                             continue 
                         
+                        # Limpeza de widgets e anotações para aceitação no E-Docs [cite: 2, 4]
                         for widget in pagina.widgets(): pagina.delete_widget(widget)
                         for annot in pagina.annots(): pagina.delete_annot(annot)
                             
@@ -98,10 +100,11 @@ if uploaded_files:
                 pdf_final.save(output, garbage=4, deflate=True, clean=True)
                 pdf_final.close()
                 
+                # Armazena o resultado no estado da sessão
                 st.session_state['pdf_gerado'] = output.getvalue()
                 st.session_state['nome_arquivo'] = nome_final_str
 
-    # Exibição dos botões lado a lado
+    # Exibição dos botões após a mesclagem
     if 'pdf_gerado' in st.session_state:
         st.success(f"✅ Arquivo gerado: {st.session_state['nome_arquivo']}")
         
@@ -114,7 +117,7 @@ if uploaded_files:
                 mime="application/pdf"
             )
         with col2:
-            # Ao clicar, limpa o estado e a página recomeça sem o erro de no-op
-            if st.button("🔄 LIMPAR"):
+            # Botão de limpeza que reinicia a aplicação
+            if st.button("🔄 LIMPAR TUDO"):
                 st.session_state.clear()
                 st.rerun()
