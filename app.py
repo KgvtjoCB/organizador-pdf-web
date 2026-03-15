@@ -8,38 +8,37 @@ st.set_page_config(page_title="Organizador de PDFs", layout="centered")
 # --- ESTILIZAÇÃO CSS CUSTOMIZADA ---
 st.markdown("""
     <style>
-    /* Estilo para o botão MESCLAR (Vermelho Harmônico) */
+    /* Botão MESCLAR (Vermelho) */
     div.stButton > button:first-child {
         background-color: #d32f2f;
         color: white;
         border-radius: 5px;
-        border: none;
         width: 100%;
-        transition: 0.3s;
     }
-    div.stButton > button:first-child:hover {
-        background-color: #b71c1c;
-        color: white;
-    }
-
-    /* Estilo para o botão de DOWNLOAD (Azul Harmônico) */
+    /* Botão de DOWNLOAD (Azul) */
     div.stDownloadButton > button {
         background-color: #1976d2;
         color: white;
         border-radius: 5px;
-        border: none;
         width: 100%;
-        transition: 0.3s;
     }
-    div.stDownloadButton > button:hover {
-        background-color: #1565c0;
+    /* Botão LIMPAR (Cinza) */
+    .stButton > button[kind="secondary"] {
+        background-color: #6c757d;
         color: white;
+        border-radius: 5px;
+        width: 100%;
     }
     </style>
     """, unsafe_allow_html=True)
 
 st.title("📄 Sistema de Mesclagem de Documentos")
-st.info("Organize a ordem dos documentos abaixo. O download será feito via navegador.")
+
+# Função para resetar o estado
+def limpar_sessao():
+    for key in st.session_state.keys():
+        del st.session_state[key]
+    st.rerun()
 
 # 1. ÁREA DE UPLOAD
 uploaded_files = st.file_uploader("Selecione os arquivos PDF aqui", type="pdf", accept_multiple_files=True)
@@ -52,17 +51,16 @@ if uploaded_files:
     st.subheader("🗂️ Organizar Ordem de Mesclagem")
     
     ordem_selecionada = st.multiselect(
-        "Selecione os arquivos na ordem correta (o 1º define o nome final):",
+        "Selecione os arquivos na ordem correta:",
         options=nomes_arquivos,
         default=nomes_arquivos 
     )
 
-    # Botão MESCLAR (Estilizado via CSS como vermelho)
     if st.button("MESCLAR"):
         if not ordem_selecionada:
             st.error("Selecione pelo menos um arquivo.")
         else:
-            with st.spinner("Limpando metadados e comprimindo arquivo..."):
+            with st.spinner("Limpando metadados e comprimindo..."):
                 pdf_final = fitz.open()
                 
                 nome_original = ordem_selecionada[0]
@@ -82,24 +80,20 @@ if uploaded_files:
                             "Documento original assinado eletronicamente",
                             "INFORMAÇÕES DO DOCUMENTO",
                             "Valor Legal: ORIGINAL",
-                            "Natureza: DOCUMENTO NATO-DIGITAL",
-                            "A disponibilidade do documento pode ser conferida"
+                            "Natureza: DOCUMENTO NATO-DIGITAL"
                         ]
                         
-                        tem_termo = any(termo in texto_limpo for termo in termos_assinatura)
-                        if tem_termo and contagem_palavras < 110:
+                        if any(termo in texto_limpo for termo in termos_assinatura) and contagem_palavras < 110:
                             continue 
                         
-                        for widget in pagina.widgets():
-                            pagina.delete_widget(widget)
-                        for annot in pagina.annots():
-                            pagina.delete_annot(annot)
+                        for widget in pagina.widgets(): pagina.delete_widget(widget)
+                        for annot in pagina.annots(): pagina.delete_annot(annot)
                             
                         largura, altura = pagina.rect.width, pagina.rect.height
                         margem_direita = fitz.Rect(largura - 35, 0, largura, altura)
                         pagina.add_redact_annot(margem_direita, fill=(1, 1, 1))
                         
-                        if tem_termo:
+                        if any(termo in texto_limpo for termo in termos_assinatura):
                              area_rodape = fitz.Rect(0, altura - 220, largura, altura)
                              pagina.add_redact_annot(area_rodape, fill=(1, 1, 1))
 
@@ -113,12 +107,17 @@ if uploaded_files:
                 st.session_state['pdf_gerado'] = output.getvalue()
                 st.session_state['nome_arquivo'] = nome_final_str
 
-    # Botão de DOWNLOAD (Estilizado via CSS como azul)
+    # Exibição dos botões lado a lado
     if 'pdf_gerado' in st.session_state:
         st.success(f"✅ Arquivo gerado: {st.session_state['nome_arquivo']}")
-        st.download_button(
-            label="⬇️ CLIQUE AQUI PARA BAIXAR",
-            data=st.session_state['pdf_gerado'],
-            file_name=st.session_state['nome_arquivo'],
-            mime="application/pdf"
-        )
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            st.download_button(
+                label="⬇️ BAIXAR",
+                data=st.session_state['pdf_gerado'],
+                file_name=st.session_state['nome_arquivo'],
+                mime="application/pdf"
+            )
+        with col2:
+            st.button("🔄 LIMPAR", on_click=limpar_sessao)
