@@ -14,7 +14,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.title("📄 Sistema de Mesclagem de Documentos")
+st.title("📄 SISTEMA DE MESCLAGEM DE DOCUMENTOS")
 
 # 1. ÁREA DE UPLOAD (Fora do formulário para permitir interação)
 uploaded_files = st.file_uploader("Selecione os arquivos PDF aqui", type="pdf", accept_multiple_files=True, key="upload_key")
