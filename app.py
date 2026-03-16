@@ -24,7 +24,7 @@ if uploaded_files:
     nomes_arquivos = list(arquivos_dict.keys())
 
     st.write("---")
-    st.subheader("🗂️ Arraste para organizar a ordem)
+    st.subheader("🗂️ Arraste para organizar a ordem")
     st.caption("O primeiro arquivo da lista definirá o nome do documento final.")
     
     # COMPONENTE DE ARRASTAR E SOLTAR
