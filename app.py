@@ -4,7 +4,7 @@ import io
 from streamlit_sortables import sort_items
 
 # Configuração da página
-st.set_page_config(page_title="SISTEMA DE MESCLAGEM DE DOCUMENTOS", layout="centered")
+st.set_page_config(page_title="SISTEMA DE MESCLAGEM DE DOCUMENTOS :)", layout="centered")
 
 # --- ESTILIZAÇÃO CSS ---
 st.markdown("""
